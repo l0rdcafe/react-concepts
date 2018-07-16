@@ -7,6 +7,8 @@ import helpers from "./helpers";
 
 let state = { items: ["nice", "jacket"] };
 let time;
+let root = helpers.qs("#ui");
+let tree = [];
 
 function deepcopy(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -18,18 +20,10 @@ function getNextString() {
 }
 
 function render(data) {
-  /*
-  const span = `<span id="count">Words: ${data.items.length}</span>`;
-  const lis = data.items.map((item, i) => `<li id="${i}">${item}</li>`);
-  return `${span}<ul>${lis.join("")}</ul>`;
-         */
-
-  return [
-    h("div", {}, [
-      h("span", { id: "count" }, data.items.length),
-      h("ul", {}, data.items.map((item, i) => h("li", { id: i }, item)))
-    ])
-  ];
+  return h("div", {}, [
+    h("span", { id: "count" }, data.items.length),
+    h("ul", {}, data.items.map((item, i) => h("li", { id: i }, item)))
+  ]);
 }
 
 function updateTimeUI() {
@@ -58,42 +52,15 @@ function saveState() {
   updateTimeUI();
 }
 
-function create(el) {
-  const elm = helpers.newEl(el.tagName.toLowerCase());
-  Object.keys(el.properties).forEach(key => {
-    elm.setAttribute(key, el.properties[key]);
-  });
-
-  el.children.forEach(child => {
-    if (child.text) {
-      elm.innerHTML = child.text;
-    } else {
-      elm.appendChild(create(child));
-    }
-  });
-  return elm;
-}
-
-let tree = render(state);
-let root = tree.map(create)[0];
-const ui = helpers.qs("#ui");
-ui.appendChild(root);
-
 function updateUI(loading) {
   if (!loading) {
     saveState();
   }
 
-  /*
-  helpers.qs("#ui").innerHTML = render(state);
-      */
-
-  const vTree = render(state);
-  console.log(vTree);
-  const patches = diff(tree, vTree);
-  console.log(patches);
+  const newTree = render(state);
+  const patches = diff(tree, newTree);
   root = patch(root, patches);
-  tree = vTree;
+  tree = newTree;
 }
 
 helpers.$delegate(helpers.qs("#ui"), "li", "click", e => {
