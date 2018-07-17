@@ -22,7 +22,23 @@ function getNextString() {
 function render(data) {
   return h("div", {}, [
     h("span", { id: "count" }, data.items.length),
-    h("ul", {}, data.items.map((item, i) => h("li", { id: i }, item)))
+    h(
+      "ul",
+      {},
+      data.items.map((item, i) =>
+        h(
+          "li",
+          {
+            id: i,
+            onclick() {
+              state.items.splice(i, 1);
+              updateUI();
+            }
+          },
+          item
+        )
+      )
+    )
   ]);
 }
 
@@ -62,11 +78,6 @@ function updateUI(loading) {
   root = patch(root, patches);
   tree = newTree;
 }
-
-helpers.$delegate(helpers.qs("#ui"), "li", "click", e => {
-  state.items.splice(e.target.id, 1);
-  updateUI();
-});
 
 helpers.$on(helpers.qs("#add"), "click", () => {
   state.items.push(getNextString());
